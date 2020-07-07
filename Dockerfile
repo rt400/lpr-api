@@ -1,6 +1,8 @@
 FROM ubuntu:20.04
 MAINTAINER Yuval Mejahez "yuval.teltech@gmail.com"
 # extended from openalcr dockerfile
+ENV TZ=Asia/Jerusalem
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Install prerequisites
 RUN apt-get update && apt-get install -y \
@@ -13,22 +15,25 @@ RUN apt-get update && apt-get install -y \
     liblog4cplus-dev \
     libopencv-dev \
     libtesseract-dev \
+    beanstalkd \
     wget \
-    git \
-    python-dev \
-    python-pip
+    python3 \
+    python3-pip
 
-RUN pip install flask flask-restful
+WORKDIR /srv
+RUN git clone https://github.com/openalpr/openalpr.git
 
+run mkdir /srv/openalpr/src/build
+workdir /srv/openalpr/src/build
+
+RUN cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr -DCMAKE_INSTALL_SYSCONFDIR:PATH=/etc .. && \
+    make -j2 && \
+    make install
+
+RUN pip3 install flask flask-restful
 WORKDIR /home
-RUN wget -O - http://deb.openalpr.com/openalpr.gpg.key | sudo apt-key add -
-RUN echo "deb http://deb.openalpr.com/master/ openalpr main" | sudo tee /etc/apt/sources.list.d/openalpr.list
-RUN apt-get update
-RUN apt-get install -y -f openalpr openalpr-daemon openalpr-utils libopenalpr-dev
-
-WORKDIR /home
-RUN git clone https://github.com/mbartoli/restful-alpr
-WORKDIR /home/restful-alpr/alpr
+RUN git clone https://github.com/rt400/lpr-api
+WORKDIR /home/lpr-api
 
 EXPOSE 3370
-CMD ["python", "restful-alpr.py"]
+CMD ["python", "lpr-api.py"]
