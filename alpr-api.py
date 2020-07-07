@@ -9,21 +9,22 @@ api = Api(app)
 
 todos = {}
 
+
 class alprAPI(Resource):
     def alpr(self, url):
-	ext = url.split(".")[-1]
-	os.popen('curl -o input.'+ext+' '+url)
-	output = os.popen('alpr -j input.'+ext).read().rstrip("\n")
-	return output
-    
+        ext = url.split(".")[-1]
+        os.popen('curl -o input.' + ext + ' ' + url)
+        output = os.popen('alpr -j input.' + ext).read().rstrip("\n")
+        return output
+
     def get(self, todo_id):
         return {todo_id: todos[todo_id]}
 
     def put(self, todo_id):
-	url = request.form['data']
-	raw = self.alpr(url)
-	formatted_json = json.loads(raw)
-	return formatted_json
+        url = request.form['data']
+        raw = self.alpr(url)
+        formatted_json = json.loads(raw)
+        return formatted_json
 
 
 api.add_resource(alprAPI, '/<string:todo_id>')
