@@ -36,4 +36,4 @@ RUN git clone https://github.com/rt400/lpr-api
 WORKDIR /home/lpr-api
 
 EXPOSE 3370
-CMD ["python", "alpr-api.py"]
+CMD ["python3", "alpr-api.py"]
